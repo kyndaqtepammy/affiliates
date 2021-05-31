@@ -31,16 +31,36 @@
     	 if( is_page('affiliate') ) {
     		if ( get_query_var('sddsref-id') ) {
     	 	#insert details into db here
-    			$new_post = array(
-    				'post_title' => 'New referal',
-                    'post_content' => "get site src",
-    				'post_status' => 'publish',
-    				'post_date'=> date('Y-m-d H:i:s'),
-    				'post_author' => get_query_var('sddsref-id'),
-    				'post_type' => 'sdds-affiliate'
-    			);
-    			$post_id = wp_insert_post($new_post, true);
-                //echo $post_id;
+                //GET USER DETAILS BY ID 
+                $user = get_user_by( 'id', get_query_var('sddsref-id') );
+                $fullname = $user->first_name . ' ' . $user->last_name;
+                $email    = $user->user_email;
+                
+                    require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+                    global $wpdb;
+                    $tablename = $wpdb->prefix .'sdds_affiliates';
+                    var_dump(get_query_var('sddsref-id'));
+                    $sql = "CREATE TABLE $tablename (
+                        id INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                        fullname VARCHAR(255) NOT NULL,
+                        email VARCHAR(255) NOT NULL,
+                        site_from VARCHAR(255) NOT NULL,
+                        ip_address VARCHAR(255) NOT NULL,
+                        dated DATETIME(255) NOT NULL
+                        )";
+                    
+                   // if (maybe_create_table( $wpdb->prefix . $tablename, $sql )) { //table exists
+                        $wpdb->insert($tablename,
+                        array( 'fullname'=> $fullname,
+                        'email'=> $email,
+                        'site_from'=> "Query var parameter here",
+                        'ip_address'=> get_the_user_ip(),
+                        'dated'=> date('Y-m-d H:i:s')
+                        )
+                        , array('%s', '%s', '%s', '%s', '%s')
+                     );
+                    //}
+                    //TODO: check if ip exists before insert    
     	    } else {
                 echo " Query var not defined";
             }
@@ -102,36 +122,6 @@
         <h1>
 			<?php esc_html_e( 'Welcome to my custom admin page.', 'my-plugin-textdomain' ); ?>
 		</h1>
-        <?php
-        
-    //     $postargs = array(
-    //         'post_type' => 'sdds-affiliate',
-    //         'posts_per_page' => '-1'
-    //     );
-
-    //     $query = new WP_Query($postargs);
-    //     if( $query->have_posts() ):
-    //         while( $query->have_posts() ): $query->the_post();
-    //         the_title();
-    //         the_excerpt();
-    //     endwhile;
-    // endif;
-    // wp_reset_postdata();
-
-
-        // $userargs = array(
-        //     'role'    => 'affiliate',
-        //     'orderby' => 'user_nicename',
-        //     'order'   => 'ASC'
-        // );
-        // $users = get_users( $args );
-
-        // echo '<ul>';
-        // foreach ( $users as $user ) {
-        //     echo '<li>' . esc_html( $user->display_name ) . '[' . esc_html( $user->user_email ) . ']</li>';
-        // }
-        // echo '</ul>';
-        ?>
 
         <?php
     }
@@ -356,5 +346,33 @@
         static $wp_error;  //holds global variable safely
         return isset($wp_error) ? $wp_error : ($wp_error = new WP_Error(null, null, null));
     }
+
+    
+
+    //get the user iP address 
+    function get_the_user_ip() {
+    // populate a local variable to avoid extra function calls.
+    // NOTE: use of getenv is not as common as use of $_SERVER.
+//       because of this use of $_SERVER is recommended, but 
+//       for consistency, I'll use getenv below
+        $tmp = getenv("HTTP_CLIENT_IP");
+        // you DON'T want the HTTP_CLIENT_ID to equal unknown. That said, I don't
+        // believe it ever will (same for all below)
+        if ( $tmp && !strcasecmp( $tmp, "unknown"))
+            return $tmp;
+            
+        $tmp = getenv("HTTP_X_FORWARDED_FOR");
+        if( $tmp && !strcasecmp( $tmp, "unknown"))
+            return $tmp;
+            
+        // no sense in testing SERVER after this. 
+        // $_SERVER[ 'REMOTE_ADDR' ] == gentenv( 'REMOTE_ADDR' );
+        $tmp = getenv("REMOTE_ADDR");
+        if($tmp && !strcasecmp($tmp, "unknown"))
+            return $tmp;
+            
+        return("unknown");
+    }
+    
 
 ?>
