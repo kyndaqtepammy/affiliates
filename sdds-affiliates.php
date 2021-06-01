@@ -116,45 +116,24 @@
         );
     }
 
-    //html for the admin backend page
-    function afiiliate_entries_callback_function() {
-        ?>
-        <h1>
-			<?php esc_html_e( 'Welcome to my custom admin page.', 'my-plugin-textdomain' ); ?>
-		</h1>
-
-        <?php
-    }
 
     function my_add_menu_items(){
-        add_menu_page( 'My Plugin List Table', 'My List Table Example', 'activate_plugins', 'my_list_test', 'my_render_list_page' );
+        add_menu_page( 'Affiliate Referals', 'Affiliate Referals', 'activate_plugins', 'my_list_test', 'render_list' );
     }
     add_action( 'admin_menu', 'my_add_menu_items' );
     
-    function my_render_list_page(){
+    function render_list(){
       $exampleListTable = new Affliates_List();
       $exampleListTable->prepare_items();
       ?>
           <div class="wrap">
               <div id="icon-users" class="icon32"></div>
-              <h2>Example List Table Page</h2>
+              <h2>Affiliate Entries</h2>
               <?php $exampleListTable->display(); ?>
           </div> 
           <?php
     }
       
-      function add_options() {
-        global $myListTable;
-        $option = 'per_page';
-        $args = array(
-               'label' => 'Books',
-               'default' => 10,
-               'option' => 'books_per_page'
-               );
-        add_screen_option( $option, $args );
-        $myListTable = new Affliates_List();
-      }
-      add_action( 'admin_menu', 'my_add_menu_items' );
     
 
     //button to show popup and generate link
