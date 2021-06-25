@@ -3,15 +3,15 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
     require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 }
 
-class Affliates_List extends WP_List_Table {
-      /**
+
+class Referals_List extends WP_List_Table {
+    /**
      * Prepare the items for the table to process
      *
      * @return Void
      */
 
-    public function prepare_items()
-    {
+    public function prepare_items() {
         $columns = $this->get_columns();
         $hidden = $this->get_hidden_columns();
         $sortable = $this->get_sortable_columns();
@@ -32,68 +32,59 @@ class Affliates_List extends WP_List_Table {
 
         $this->_column_headers = array($columns, $hidden, $sortable);
         $this->items = $data;
-    }  
-    
-    
-
-     /**
-     * Override the parent columns method. Defines the columns to use in your listing table
-     *
-     * @return Array
-     */
-    public function get_columns()
-    {
-        $columns = array(
-            //'id'        => 'Entry ID',
-            'fullname'  => 'Full Name',
-            'email'     => 'Email',
-            'clicks'    => 'Clicks'
-            //'site_from' => 'Link Clicked From',
-            //'ip_address'=> 'IP Address',
-           // 'dated'     => 'Date'
-        );
-
-        return $columns;
     }
 
 
 
-     /**
+    public function get_columns() {
+        $columns = array(
+            'id'        => 'Entry ID',
+            'fullname'  => 'Full Name',
+            'email'     => 'Email',
+            //'clicks'    => 'Clicks'
+            'site_from' => 'Link Clicked From',
+            'ip_address'=> 'IP Address',
+            'dated'     => 'Date'
+        );
+
+        return $columns;
+    }
+    
+
+
+
+    /**
      * Define which columns are hidden
      *
      * @return Array
      */
-    public function get_hidden_columns()
-    {
+    public function get_hidden_columns() {
         return array();
     }
 
 
 
-     /**
+    /**
      * Define the sortable columns
      *
      * @return Array
      */
-    public function get_sortable_columns()
-    {
+    public function get_sortable_columns() {
         return array('fullname' => array('fullname', false));
     }
 
 
 
-     /**
+         /**
      * Get the table data
      *
      * @return Array
      */
-    private function table_data()
-    {
+    private function table_data() {
         $data = array();
         global $wpdb;
         $tablename = $wpdb->prefix.'sdds_affiliates';
-        //$data = $wpdb->get_results("SELECT * FROM $tablename", ARRAY_A);
-        $data = $wpdb->get_results("SELECT fullname, email, COUNT(*) AS clicks FROM $tablename GROUP BY email", ARRAY_A);
+        $data = $wpdb->get_results("SELECT * FROM $tablename", ARRAY_A);
         return $data;
         //print_r($data) ;
     }
@@ -111,13 +102,13 @@ class Affliates_List extends WP_List_Table {
     public function column_default( $item, $column_name )
     {
         switch( $column_name ) {
-            //case 'id':
+            case 'id':
             case 'fullname':
             case 'email':
-            case 'clicks':
-            //case 'site_from':
-            //case 'ip_address':
-            //case 'dated':
+            //case 'clicks':
+            case 'site_from':
+            case 'ip_address':
+            case 'dated':
                 return $item[ $column_name ];
 
             default:
@@ -127,8 +118,7 @@ class Affliates_List extends WP_List_Table {
 
 
 
-    
-  /**
+    /**
      * Allows you to sort the data by the variables set in the $_GET
      *
      * @return Mixed
@@ -162,42 +152,4 @@ class Affliates_List extends WP_List_Table {
         return -$result;
     }
 
-
-
-    function column_clicks($item){
-        $page = wp_unslash( $_REQUEST['page'] ); // WPCS: Input var ok.
-
-		// Build edit row action.
-		$edit_query_args = array(
-			'page'   => $page,
-			'action' => 'view_affiliate',
-			'email'  => $item['email'],
-		);
-
-		$actions['view'] = sprintf(
-			'<a href="%1$s">%2$s</a>',
-			esc_url( wp_nonce_url( add_query_arg( $edit_query_args, 'admin-post.php' ), 'view_affiliate' . $item['email'] ) ),
-			_x( 'View Details', 'view affilate details' )
-		);
-
-		// Build delete row action.
-		$delete_query_args = array(
-			'page'   => $page,
-			'action' => 'delete',
-			'email'  => $item['email'],
-		);
-
-	
-
-		// Return the title contents.
-		return sprintf( '%1$s <span style="color:silver;">(id:%2$s)</span>%3$s',
-			$item['clicks'],
-			$item['email'],
-			$this->row_actions( $actions, true )
-		);
-    }
-   
-
-
 } //class
-
