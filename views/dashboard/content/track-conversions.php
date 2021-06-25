@@ -4,12 +4,11 @@
     global $wpdb;
     $tablename = $wpdb->prefix.'sdds_affiliates';
     global $current_user;
-get_currentuserinfo();
+    wp_get_current_user();
 
-$email = (string) $current_user->user_email;
-    $email = $current_user->user_email; 
-    $data = $wpdb->get_results("SELECT dated, COUNT(*) AS clicks FROM $tablename GROUP BY dated", ARRAY_N);
-    //print_r($data) ; //die;
+    $email = (string) $current_user->user_email; 
+    $data = $wpdb->get_results("SELECT dated, COUNT(dated) AS clicks FROM $tablename WHERE email='$email' GROUP BY CAST(dated AS DATE)", ARRAY_N);
+    //var_dump($data) ; //die;
 ?>
 
 <table style="width:100%">
